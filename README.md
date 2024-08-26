@@ -1,4 +1,4 @@
-# GenerateTextFromImage Documentation
+# CropsInjuryDetection
 
 ## Table of Contents
 
@@ -15,74 +15,90 @@
 
 ## 1. Introduction
 
-Welcome to the documentation for the "GenerateTextFromImage" project. This project focuses on generating textual descriptions for images using deep learning techniques. The project was developed on Google Colab and uses a combination of convolutional neural networks (CNN) and natural language processing (NLP) to achieve the desired outcomes. The primary model uses the VGG16 architecture for feature extraction from images, and these features, combined with image descriptions, are used to train the main model.
+Welcome to the "CropsInjuryDetection" project! This project was developed to classify vegetation into four distinct classes: Blight, Common Rust, Gray Leaf Spot, and Healthy. The goal is to assist in the early detection of diseases in crops, allowing for more timely and effective interventions.
+
+The project was implemented in a Jupyter Notebook designed to run on Google Colab. It utilizes a Convolutional Neural Network (CNN) developed using PyTorch to achieve high classification accuracy.
 
 ## 2. Dataset
 
-The dataset used for this project is the Flickr8k dataset, which contains 8,000 images along with five different captions for each image. You can download the dataset from the following link: [Flickr8k Dataset](https://www.kaggle.com/datasets/adityajn105/flickr8k/data).
+The dataset used for this project can be downloaded from the following link: [Crops Injury Detection Dataset](https://drive.google.com/file/d/1pXjbbvxFMctaZvfSY3E0fn0nMa0TB7G0/view).
 
 ### Important:
-- After downloading, place the dataset in the same directory as the Jupyter notebook `GenerateTextImage.ipynb`.
+- After downloading, place the dataset in the same directory as the notebook `Detection_of_diseases_in_crops.ipynb`.
 
 ## 3. System Architecture
 
-The project utilizes a modular architecture, where image features are extracted using the VGG16 model. These features are then passed through a deep learning model to generate descriptive text. The model architecture integrates both convolutional layers (for image processing) and recurrent layers (for text generation).
+The project employs a Convolutional Neural Network (CNN) to classify images into one of four classes:
+- Blight
+- Common Rust
+- Gray Leaf Spot
+- Healthy
+
+The architecture is simple yet effective, making it suitable for deployment on various platforms, including mobile and embedded systems.
 
 ## 4. Installation
 
-To set up the project, follow these steps:
+To set up and run the project, follow these steps:
 
 ### 4.1 Dependencies
 
 Make sure you have the following dependencies installed:
 
-- TensorFlow
-- Keras
-- Numpy
-- Pandas
-- Python 3.10.13
+- PyTorch
+- NumPy
 
 ### 4.2 Setting up Environment
 
-Since the project was developed on Google Colab, the environment setup is straightforward:
+Since the project is designed to run on Google Colab, setting up the environment is straightforward:
 
-1. Clone the repository or upload the `GenerateTextImage.ipynb` file to your Google Drive.
+1. Clone the repository or upload the `Detection_of_diseases_in_crops.ipynb` notebook to your Google Drive.
 2. Download the dataset and place it in the same directory as the notebook.
 3. Open the notebook in Google Colab.
 4. Install the required libraries by running the setup cells in the notebook.
 
 ## 5. Model Details
 
-The model used in this project consists of two primary components:
+The CNN model used in this project is designed to process images of crops and classify them into the four categories mentioned above. Below is the structure of the model:
 
-1. **VGG16**: This pre-trained CNN model is used for feature extraction from the input images. The extracted features represent the essential visual information from the images.
+```python
+class ConvNeuralNetwork(nn.Module):
+    def __init__(self):
+        super(ConvNeuralNetwork, self).__init__()
 
-2. **Text Generation Model**: The main model takes the extracted image features and combines them with the corresponding text descriptions to learn a mapping between images and textual descriptions. The structure of the text generation model is as follows:
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2)
+        )
 
-   ```python
-   input_1 = Input(shape=(4096,))
-   drop_1 = Dropout(0.45)(input_1)
-   dense_1 = Dense(256, activation='relu')(drop_1)  # Layer responsible for text processing
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2)
+        )
 
-   input_2 = Input(shape=(max_length,))
-   seq = Embedding(vocab_size, 256, mask_zero=True)(input_2)
-   drop_2 = Dropout(0.45)(seq)
-   lstm = LSTM(256)(drop_2)
+        self.fc = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(in_features=131072, out_features=32),
+            nn.ReLU(),
+            nn.Linear(in_features=32, out_features=16),
+            nn.ReLU(),
+            nn.Linear(in_features=16, out_features=4)
+        )
 
-   decoder1 = add([dense_1, lstm])
-   decoder2 = Dense(256, activation='relu')(decoder1)
-   outputs = Dense(vocab_size, activation='softmax')(decoder2)
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.fc(x)
+        return x
+```
 
-   model = Model(inputs=[input_1, input_2], outputs=outputs)
-   model.compile(loss='categorical_crossentropy', optimizer='adam')
-``
+**Key Components**:
 
-** Key Components**:
-- input_1: Takes the features extracted by VGG16.
-- input_2: Takes the sequence of words representing the description.
-- Dropout layers: Used to prevent overfitting.
-- Dense and LSTM layers: Used to process the features and generate the final description.
-- Output layer: Generates the probability distribution over the vocabulary to form the final caption.
+- Conv Layers: Extract features from the input images.
+- ReLU Activation: Introduces non-linearity to the model.
+- MaxPooling: Reduces the spatial dimensions of the feature maps.
+- Fully Connected Layers: Combine the features and map them to the output classes.
 
 ## 6. Evaluation
 
@@ -98,5 +114,6 @@ To use the model:
 Example:
 Run the cells in the notebook to train the CNN model and classify a batch of images from the dataset.
 
-## 8. License
+## License
+
 This project is licensed under the [MIT License](LICENSE).
