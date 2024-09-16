@@ -114,6 +114,6 @@ To use the model:
 Example:
 Run the cells in the notebook to train the CNN model and classify a batch of images from the dataset.
 
-## License
+## 8. License
 
 This project is licensed under the [MIT License](LICENSE).
